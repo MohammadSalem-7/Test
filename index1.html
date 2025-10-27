@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>موقع اختبارات - FIRST</title>
+  <style>
+    :root{
+      --bg-1:#07101a; /* very dark blue */
+      --bg-2:#0b2233; /* deep blue */
+      --card:#092936; /* card */
+      --accent:#00d1ff; /* cyan */
+      --accent-2:#0ea5a4;
+      --muted:#9fb6c6;
+      --glass: rgba(255,255,255,0.03);
+      --success:#16a34a;
+      --danger:#ef4444;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:linear-gradient(180deg,var(--bg-1),var(--bg-2)); color:#e6f7fb; -webkit-font-smoothing:antialiased}
+
+    header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);backdrop-filter: blur(6px)}
+    header h1{margin:0;font-size:18px}
+    header .meta{font-size:13px;color:var(--muted)}
+
+    main{max-width:1100px;margin:26px auto;padding:20px}
+    .layout{display:grid;grid-template-columns:280px 1fr;gap:18px}
+
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:16px;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+
+.sidebar .quiz-btn {
+    display: block;
+    text-align: right;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    background: #1eaed0;
+    border: 1px solid rgb(54 37 37);
+    cursor: pointer;
+}
+    .sidebar .quiz-btn.active{background:linear-gradient(90deg, rgba(0,209,255,0.08), rgba(14,165,164,0.04));border-color:rgba(0,209,255,0.18)}
+    .small{font-size:13px;color:var(--muted)}
+
+    .quiz-area{padding:14px}
+    .question{font-size:18px;margin-bottom:12px}
+    .choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .choice{padding:12px;border-radius:10px;background:var(--glass);border:1px solid transparent;cursor:pointer;text-align:right}
+    .choice.selected{border-color:var(--accent);box-shadow:0 8px 22px rgba(0,209,255,0.06);background:rgba(2,6,23,0.35)}
+    .choice.correct{border-color:var(--success);background:linear-gradient(90deg, rgba(22,163,74,0.06), rgba(2,6,23,0.2))}
+    .choice.wrong{border-color:var(--danger);background:linear-gradient(90deg, rgba(239,68,68,0.06), rgba(2,6,23,0.2))}
+
+    .controls{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.btn {
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #0faae8;
+    border: 1px solid rgb(0 0 0);
+    cursor: pointer;
+}   
+ .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#022;font-weight:600;border:none}
+    .progress-wrap{width:220px}
+    .progress{height:10px;background:rgba(255,255,255,0.04);border-radius:8px;overflow:hidden}
+    .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%}
+
+    .footer{margin-top:16px;text-align:center;color:var(--muted);font-size:13px}
+
+    /* responsive */
+    @media(max-width:900px){
+      .layout{grid-template-columns:1fr;}
+      .choices{grid-template-columns:1fr}
+      .sidebar{order:2}
+      .quiz-area{order:1}
+    }
+
+    /* result details */
+    .result-box{padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(2,6,23,0.6), rgba(2,6,23,0.4));border:1px solid rgba(255,255,255,0.03)}
+    .answer-list{margin-top:12px;display:grid;gap:8px}
+    .answer-item{padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);}
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>موقع اختبارات • FIRST</h1>
+    <div class="meta">ثيم: أزرق تكنولوجي — صفحة واحدة • حفظ النتائج محلياً</div>
+  </header>
+
+  <main>
+    <div class="layout">
+      <aside class="sidebar card">
+        <h3 style="margin:0 0 10px 0">الاختبارات</h3>
+        <div class="small" style="margin-bottom:10px">اختر اختبار لبدء. كل اختبار 20 سؤالاً — اختيار من متعدد.</div>
+        <button class="quiz-btn" data-quiz="computer">أساسيات الكمبيوتر</button>
+        <button class="quiz-btn" data-quiz="network">أساسيات الشبكات</button>
+        <button class="quiz-btn" data-quiz="programming">أساسيات البرمجة</button>
+
+        <div style="margin-top:14px" class="small">
+          <div>آخر محاولة: <span id="last-attempt">لا توجد</span></div>
+          <div style="margin-top:6px">أفضل نتائج:</div>
+          <ul style="margin:6px 0 0 0;padding:0 12px 0 0;list-style:none;font-size:13px;color:var(--muted)">
+            <li>كمبيوتر: <span id="best-computer">—</span></li>
+            <li>شبكات: <span id="best-network">—</span></li>
+            <li>برمجة: <span id="best-programming">—</span></li>
+          </ul>
+        </div>
+
+      </aside>
+
+      <section class="card quiz-area" id="quiz-card">
+        <div id="welcome" style="text-align:center;padding:50px 10px;color:var(--muted)">
+          اضغط على أحد الاختبارات في اليسار لبدء. واجهة تفاعلية وحفظ النتائج في متصفحك.
+        </div>
+
+        <div id="quiz-panel" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div>
+              <div id="quiz-title" style="font-weight:700;font-size:18px"></div>
+              <div class="small" id="quiz-sub"></div>
+            </div>
+            <div class="progress-wrap">
+              <div class="small">تقدم الإجابة</div>
+              <div class="progress" style="margin-top:6px"><i id="progress-bar"></i></div>
+            </div>
+          </div>
+
+          <div class="question" id="question-text"></div>
+          <div class="choices" id="choices"></div>
+
+          <div class="controls">
+            <div>
+              <button class="btn" id="prev-btn">السابق</button>
+              <button class="btn" id="next-btn">التالي</button>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button class="btn" id="reset-btn">إعادة الاختبار</button>
+              <button class="btn primary" id="submit-btn">تسليم الاختبار</button>
+            </div>
+          </div>
+
+          <div id="result-area" style="display:none;margin-top:14px">
+            <div class="result-box">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <div id="score-title" style="font-size:20px;font-weight:700"></div>
+                  <div class="small" id="score-sub"></div>
+                </div>
+                <div>
+                  <button class="btn" id="close-result">إغلاق</button>
+                </div>
+              </div>
+
+              <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+                <div class="small">التوقيت: <span id="attempt-time"></span></div>
+                <div class="small">الاختبار: <span id="attempt-quiz"></span></div>
+              </div>
+
+              <div class="answer-list" id="answer-list"></div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+    </div>
+
+    <div class="footer">تم التطوير بواسطة FIRST • النتائج تحفظ في LocalStorage (المتصفح)</div>
+  </main>
+
+  <script>
+  // ------------------ بيانات الاختبارات (20 سؤال لكل اختبار) ------------------
+  const quizzes = {
+    computer: {
+      title: 'أساسيات الكمبيوتر',
+      questions: [
+        { q: 'ما هو المكون الذي يقوم بتخزين البيانات مؤقتًا أثناء تشغيل البرنامج؟', choices: ['الهارد ديسك', 'الرام (RAM)', 'المعالج (CPU)', 'الكرت الجرافيكس'], answer: 1 },
+        { q: 'أي من التالي هو نظام تشغيل؟', choices: ['Chrome', 'Firefox', 'Windows 10', 'HTML'], answer: 2 },
+        { q: 'ما وظيفة المعالج (CPU)?', choices: ['تخزين الملفات', 'تنفيذ تعليمات البرنامج', 'عرض الصور', 'إدارة الشبكة'], answer: 1 },
+        { q: 'ما نوع الذاكرة التي تحتفظ بالبيانات بعد إيقاف التشغيل؟', choices: ['RAM', 'ROM', 'SSD/HDD', 'Cache'], answer: 2 },
+        { q: 'ما معنى اختصار USB؟', choices: ['Universal Serial Bus', 'Unique System Backup', 'Universal Storage Block', 'User Service Bundle'], answer: 0 },
+        { q: 'أي من هذه الوحدات مسؤول عن معالجة الرسوميات؟', choices: ['GPU', 'CPU', 'PSU', 'RAM'], answer: 0 },
+        { q: 'ما هي واجهة المستخدم الرسومية؟', choices: ['سطر الأوامر', 'واجهة تعتمد النوافذ والأيقونات', 'لغة برمجة', 'نوع من الكابلات'], answer: 1 },
+        { q: 'ما المقصود بـ BIOS؟', choices: ['نظام تشغيل', 'برنامج لتشغيل الجهاز الأساسي', 'برنامج مكافحة فيروسات', 'واجهة رسومية'], answer: 1 },
+        { q: 'أي من هذه صيغ ملفات مستندات نصية؟', choices: ['.exe', '.docx', '.iso', '.dll'], answer: 1 },
+        { q: 'ما الدور الرئيسي للقرص الصلب (HDD/SSD)?', choices: ['تشغيل التطبيقات', 'تخزين دائم للبيانات', 'عرض الفيديو', 'تنفيذ المعالجات'], answer: 1 },
+        { q: "ما المقصود بـ 'سحابة' (Cloud) في تكنولوجيا المعلومات؟", choices: ['مساحة تخزين محلية', 'خدمة تخزين وتشغيل عبر الإنترنت', 'كابل اتصال', 'برنامج مضاد للفيروسات'], answer: 1 },
+        { q: 'أي من التالي يعد برنامجًا مفتوح المصدر؟', choices: ['Windows', 'Linux', 'MacOS', 'Microsoft Office'], answer: 1 },
+        { q: 'ما المقصود بـ "ملف مضغوط" (ZIP)؟', choices: ['ملف يشغل تلقائيًا', 'تجميع وتقليل حجم الملفات', 'فيديو عالي الدقة', 'نوع من البرامج'], answer: 1 },
+        { q: 'ما هو المقصود بـ "برامج ضارة" (Malware)?', choices: ['برامج تحسن الأداء', 'برامج ضارة تهدف للسرقة أو الإضرار', 'ملفات وسائط', 'تطبيقات رسمية فقط'], answer: 1 },
+        { q: 'ما هي وظيفة مزود الطاقة (PSU) في جهاز الكمبيوتر؟', choices: ['تحويل الطاقة الكهربائية وتزويد المكونات', 'تخزين البيانات', 'عرض الصورة', 'الاتصال بالإنترنت'], answer: 0 },
+        { q: 'أي من التالي يُستخدم لنسخ احتياطي كامل للنظام؟', choices: ['Task Manager', 'System Image / Backup', 'Device Manager', 'Control Panel'], answer: 1 },
+        { q: 'ما هي وحدة قياس سرعة المعالج؟', choices: ['RPM', 'GHz', 'MB', 'Pixels'], answer: 1 },
+        { q: 'ما الذي يحدد حجم التخزين في محرك SSD؟', choices: ['سرعة المعالج', 'سعة الذاكرة', 'سعة التخزين (GB/TB)', 'منافذ USB'], answer: 2 },
+        { q: 'ما فائدة تحديثات النظام؟', choices: ['زيادة حجم الهارد', 'تحسين الأمان والأداء', 'حذف البرامج', 'تغيير شكل الواجهة فقط'], answer: 1 },
+        { q: 'ما المقصود بـ "ملف تنفيذي" (Executable)?', choices: ['ملف وسائط', 'ملف يحتوي أوامر لتشغيل برنامج', 'ملف نصي فقط', 'ملف مضغوط'], answer: 1 }
+      ]
+    },
+
+    network: {
+      title: 'أساسيات الشبكات',
+      questions: [
+        { q: 'ما هو الـ IP؟', choices: ['بروتوكول لتخزين الملفات', 'عنوان رقمي يحدد جهازًا في الشبكة', 'نوع من الكابلات', 'برنامج تشغيل'], answer: 1 },
+        { q: 'ما وظيفة الراوتر (Router)?', choices: ['تخزين البيانات', 'توجيه حركة المرور بين الشبكات', 'عرض صفحات الويب', 'منع الفيروسات'], answer: 1 },
+        { q: 'أي من هذه الطبقات في نموذج OSI تتعامل مع التوجيه والوسائط؟', choices: ['الطبقة الفيزيائية', 'طبقة التطبيق', 'طبقة الشبكة (Network)', 'طبقة العرض'], answer: 2 },
+        { q: 'ما الفرق بين LAN و WAN؟', choices: ['LAN لشبكة محلية، WAN لشبكة واسعة', 'LAN أسرع دائمًا من WAN', 'LAN نوع من الأجهزة', 'WAN بروتوكول'], answer: 0 },
+        { q: 'ما فائدة بروتوكول DHCP؟', choices: ['تعيين عناوين IP آليًا للأجهزة', 'تشفير البيانات', 'إدارة كلمات المرور', 'مراقبة الأداء'], answer: 0 },
+        { q: 'ما المقصود بـ "البورت" (Port) في الشبكات؟', choices: ['منفذ مادي فقط', 'واجهة برمجية', 'قناة منطقية لتطبيق معين على الجهاز', 'اسم جهاز'], answer: 2 },
+        { q: 'ما هو البروتوكول المستخدم لنقل صفحات الويب؟', choices: ['FTP', 'HTTP/HTTPS', 'SMTP', 'DNS'], answer: 1 },
+        { q: 'ما وظيفة DNS؟', choices: ['تحويل أسماء النطاقات إلى عناوين IP', 'حماية الشبكة', 'إدارة البنية التحتية للسيرفر', 'تشغيل التطبيقات'], answer: 0 },
+        { q: 'ما معنى اختصار WLAN؟', choices: ['Wireless Local Area Network', 'Wide LAN', 'World LAN', 'Wired LAN'], answer: 0 },
+        { q: 'ما هي ميزة استخدام VLAN؟', choices: ['توسيع النطاق الترددي العالمي', 'عزل وتقسيم الشبكة منطقياً', 'تقوية الكابل', 'حذف عنوان IP'], answer: 1 },
+        { q: 'ما المقصود بـ "التبديل" (Switch) في الشبكات؟', choices: ['جهاز يربط الشبكات معًا على مستوى IP', 'جهاز يربط الأجهزة داخل نفس الشبكة محليًا', 'مزود خدمة الإنترنت', 'نوع من الكابلات'], answer: 1 },
+        { q: 'ما هو NAT؟', choices: ['نوع من الأسلاك', 'ترجمة عناوين الشبكة لتشارك عنوان واحد', 'بروتوكول نقل ملفات', 'خدمة استضافة'], answer: 1 },
+        { q: 'ما هي خاصية الـ Firewall؟', choices: ['تخزين النسخ الاحتياطي', 'تنظيم حركة المرور ومنع الوصول غير المصرح', 'توصيل الأجهزة', 'تغيير عنوان IP'], answer: 1 },
+        { q: 'ما البروتوكول المستخدم لإرسال البريد الإلكتروني؟', choices: ['SMTP', 'HTTP', 'FTP', 'SNMP'], answer: 0 },
+        { q: 'ما هو مصطلح "Latency"؟', choices: ['معدل نقل البيانات', 'زمن الاستجابة بين الإرسال والاستقبال', 'قوة الإشارة فقط', 'نوع جهاز التوجيه'], answer: 1 },
+        { q: 'ما هي عنوان البث (Broadcast)?', choices: ['عنوان يرسل لحاسوب معين فقط', 'عنوان يرسل لكل الأجهزة في الشبكة', 'عنوان للشبكات الخارجية', 'بروتوكول خاص'], answer: 1 },
+        { q: 'أي من هذه تقنيات تشفير الشبكة اللاسلكية؟', choices: ['WPA2', 'WPS', 'RJ45', 'DHCP'], answer: 0 },
+        { q: 'ما دور كابل UTP؟', choices: ['نقل الكهرباء', 'نقل البيانات في الشبكات المحلية', 'تخزين البيانات', 'تشغيل السيرفر'], answer: 1 },
+        { q: 'ما معنى اختصار VPN؟', choices: ['Virtual Private Network', 'Very Private Network', 'Virtual Public Network', 'Verified Private Node'], answer: 0 },
+        { q: 'ما الذي يحدِّد سرعة اتصال الإنترنت عادةً؟', choices: ['عدد الأجهزة فقط', 'عرض النطاق الترددي (Bandwidth) ومزود الخدمة', 'نوع المتصفح', 'حجم التخزين'], answer: 1 }
+      ]
+    },
+
+    programming: {
+      title: 'أساسيات البرمجة',
+      questions: [
+        { q: 'ما هي اللغة التي تُستخدم عادة لبرمجة الويب من جهة العميل؟', choices: ['Python', 'JavaScript', 'C++', 'SQL'], answer: 1 },
+        { q: 'ما المقصود بالمتغير (Variable) في البرمجة؟', choices: ['قيمة ثابتة لا تتغير', 'مخزن لقيمة يمكن تغييرها أثناء التنفيذ', 'نوع من الحلقات', 'أداة تصميم'], answer: 1 },
+        { q: 'ما فائدة الحلقات (Loops)?', choices: ['تنفيذ الكود مرة واحدة', 'تنفيذ جزء من الكود عدة مرات', 'تخزين البيانات', 'تصميم الواجهات'], answer: 1 },
+        { q: 'ما الفرق بين = و == في أغلب لغات البرمجة؟', choices: ['= للمقارنة و== للتعيين', '= للتعيين و== للمقارنة', 'لا يوجد فرق', 'كلاهما لا يعمل'], answer: 1 },
+        { q: 'ما هو "الشرط" (if statement)?', choices: ['حلقة تكرار', 'تحقق ينفذ كودًا عند تحقق شرط معين', 'نوع من المتغيرات', 'أداة لتصميم المواقع'], answer: 1 },
+        { q: 'ما هو مفهوم الدالة (Function)?', choices: ['قطعة كود قابلة لإعادة الاستخدام', 'نوع من البيانات', 'غرض رسومي', 'لغة برمجة'], answer: 0 },
+        { q: 'ما هو التنقيح (Debugging)?', choices: ['تحسين شكل الواجهة', 'اكتشاف وإصلاح الأخطاء في الكود', 'نشر التطبيق', 'كتابة المستندات'], answer: 1 },
+        { q: 'ما نوع البيانات المناسبة لتخزين عبارات نصية؟', choices: ['int', 'float', 'string', 'bool'], answer: 2 },
+        { q: 'ما الغرض من الـ IDE (مثل Visual Studio Code)?', choices: ['بيئة تطوير متكاملة لتسهيل كتابة الكود', 'خادم ويب', 'قاعدة بيانات', 'أداة رسم'], answer: 0 },
+        { q: 'ما الذي يعنيه مصطلح "Compiler"؟', choices: ['برنامج يترجم الكود إلى لغة الآلة', 'برنامج إدارة قواعد البيانات', 'مستعرض ويب', 'خدمة تخزين'], answer: 0 },
+        { q: 'ما هي بنية البيانات Array?', choices: ['نوع من المتغيرات يحتوي قيم متعددة مرتبة', 'دالة خاصة', 'أداة تصميم', 'خدمة خارجية'], answer: 0 },
+        { q: 'ما معنى "Bug" في البرمجة?', choices: ['ميزة جديدة', 'خلل/خطأ في الكود', 'نوع من الملفات', 'مكتبة خارجية'], answer: 1 },
+        { q: 'ما المقصود بـ "API"?', choices: ['واجهة برمجة التطبيقات للتفاعل بين البرامج', 'برنامج مضاد فيروسات', 'نوع من الملفات', 'قاعدة بيانات'], answer: 0 },
+        { q: 'ما فائدة استخدام التعليقات (Comments) في الكود?', choices: ['تحسين أداء البرنامج', 'شرح الكود للمطورين', 'تشفير البيانات', 'تثبيت البرامج'], answer: 1 },
+        { q: 'ما المقصود بـ "Version Control" مثل Git?', choices: ['أداة تحرير الصور', 'نظام لإدارة نسخ وتاريخ الكود', 'خادم ويب', 'قاعدة بيانات'], answer: 1 },
+        { q: 'ما هي القيمة المنطقية (Boolean)?', choices: ['نص طويل', 'عدد عشري', 'true/false (صواب/خطأ)', 'قائمة عناصر'], answer: 2 },
+        { q: 'ما هو مصطلح "Framework"?', choices: ['مكتبة جاهزة تسهل بناء التطبيقات', 'محرك بحث', 'محرر نصوص', 'خادم'], answer: 0 },
+        { q: 'ما الفرق بين الكود البرمجي والبيانات?', choices: ['لا فرق', 'الكود هو تعليمات، والبيانات هي المدخلات/القيم التي يعمل عليها الكود', 'البيانات هي لغة برمجة', 'الكود نوع من الملفات'], answer: 1 },
+        { q: 'ما المقصود بـ "Runtime Error"?', choices: ['خطأ يظهر أثناء كتابة الكود', 'خطأ يظهر أثناء تشغيل البرنامج', 'نجاح التنفيذ', 'تحذير فقط'], answer: 1 },
+        { q: 'ما المقصود بمصطلح "syntax" في البرمجة?', choices: ['أداء البرنامج', 'قواعد كتابة الكود الصحيحة', 'شكل واجهة المستخدم', 'قاعدة بيانات'], answer: 1 }
+      ]
+    }
+  };
+  // ---------------------------------------------------------------------------
+
+  // state
+  let currentQuiz = null;
+  let currentIndex = 0;
+  let userAnswers = [];
+
+  // elements
+  const quizBtns = document.querySelectorAll('.quiz-btn');
+  const welcome = document.getElementById('welcome');
+  const quizPanel = document.getElementById('quiz-panel');
+  const quizTitle = document.getElementById('quiz-title');
+  const quizSub = document.getElementById('quiz-sub');
+  const questionText = document.getElementById('question-text');
+  const choicesDiv = document.getElementById('choices');
+  const progressBar = document.getElementById('progress-bar');
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  const submitBtn = document.getElementById('submit-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  const resultArea = document.getElementById('result-area');
+  const scoreTitle = document.getElementById('score-title');
+  const scoreSub = document.getElementById('score-sub');
+  const answerList = document.getElementById('answer-list');
+  const lastAttemptEl = document.getElementById('last-attempt');
+  const bestComputer = document.getElementById('best-computer');
+  const bestNetwork = document.getElementById('best-network');
+  const bestProgramming = document.getElementById('best-programming');
+  const attemptTime = document.getElementById('attempt-time');
+  const attemptQuiz = document.getElementById('attempt-quiz');
+  const closeResult = document.getElementById('close-result');
+
+  // localStorage key
+  const STORAGE_KEY = 'first_quiz_attempts_v1';
+
+  // attach handlers to quiz buttons
+  quizBtns.forEach(b=>b.addEventListener('click', ()=>{
+    const k = b.dataset.quiz;
+    startQuiz(k);
+    quizBtns.forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+  }));
+
+  prevBtn.addEventListener('click', ()=>{
+    if(currentQuiz === null) return;
+    if(currentIndex>0){ currentIndex--; renderQuestion(); }
+  });
+  nextBtn.addEventListener('click', ()=>{
+    if(currentQuiz === null) return;
+    if(currentIndex < quizzes[currentQuiz].questions.length-1){ currentIndex++; renderQuestion(); }
+  });
+
+  resetBtn.addEventListener('click', ()=>{
+    if(!currentQuiz) return; if(!confirm('هل تريد إعادة الاختبار من البداية؟')) return;
+    userAnswers = new Array(quizzes[currentQuiz].questions.length).fill(null);
+    currentIndex = 0; renderQuestion(); updateProgress(); resultArea.style.display='none';
+  });
+
+  submitBtn.addEventListener('click', ()=>{
+    if(!currentQuiz) return; if(!confirm('هل أنت متأكد من تسليم الاختبار؟')) return; gradeQuiz();
+  });
+
+  closeResult.addEventListener('click', ()=>{ resultArea.style.display='none'; });
+
+  // load attempts and show best/last
+  function loadAttempts(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return [];
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr)? arr : [];
+    }catch(e){ console.warn('load failed', e); return []; }
+  }
+
+  function saveAttempt(attempt){
+    try{
+      const arr = loadAttempts(); arr.push(attempt); localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+      updateBestAndLast();
+    }catch(e){ console.warn('save failed', e); }
+  }
+
+  function updateBestAndLast(){
+    const arr = loadAttempts();
+    if(arr.length===0){ lastAttemptEl.textContent='لا توجد'; bestComputer.textContent='—'; bestNetwork.textContent='—'; bestProgramming.textContent='—'; return; }
+    const last = arr[arr.length-1];
+    lastAttemptEl.textContent = `${last.quizKey} — ${last.score}/${last.total} — ${new Date(last.timestamp).toLocaleString('ar-EG')}`;
+    // best per quiz
+    const best = {};
+    arr.forEach(a=>{ const k=a.quizKey; if(!best[k] || a.score>best[k].score) best[k]=a; });
+    bestComputer.textContent = best['computer'] ? `${best['computer'].score}/${best['computer'].total}` : '—';
+    bestNetwork.textContent = best['network'] ? `${best['network'].score}/${best['network'].total}` : '—';
+    bestProgramming.textContent = best['programming'] ? `${best['programming'].score}/${best['programming'].total}` : '—';
+  }
+
+  // initialize
+  updateBestAndLast();
+
+  function startQuiz(key){
+    currentQuiz = key; currentIndex = 0; userAnswers = new Array(quizzes[key].questions.length).fill(null);
+    welcome.style.display='none'; quizPanel.style.display='block'; resultArea.style.display='none';
+    quizTitle.textContent = quizzes[key].title; quizSub.textContent = `السؤال ${currentIndex+1} من ${quizzes[key].questions.length}`;
+    renderQuestion(); updateProgress();
+  }
+
+  function renderQuestion(){
+    const q = quizzes[currentQuiz].questions[currentIndex];
+    questionText.textContent = `${currentIndex+1}. ${q.q}`;
+    choicesDiv.innerHTML = '';
+    q.choices.forEach((c,i)=>{
+      const btn = document.createElement('div'); btn.className='choice'; btn.tabIndex=0; btn.innerHTML = `<div>${c}</div>`;
+      if(userAnswers[currentIndex]===i) btn.classList.add('selected');
+      btn.addEventListener('click', ()=>{ userAnswers[currentIndex]=i; // update UI
+        Array.from(choicesDiv.children).forEach(ch=>ch.classList.remove('selected'));
+        btn.classList.add('selected'); updateProgress();
+      });
+      choicesDiv.appendChild(btn);
+    });
+    quizSub.textContent = `السؤال ${currentIndex+1} من ${quizzes[currentQuiz].questions.length}`;
+  }
+
+  function updateProgress(){
+    const answered = userAnswers.filter(x=>x!==null).length; const total = quizzes[currentQuiz].questions.length;
+    const pct = Math.round((answered/total)*100);
+    progressBar.style.width = pct+'%';
+  }
+
+  function gradeQuiz(){
+    const qlist = quizzes[currentQuiz].questions; let correct=0;
+    for(let i=0;i<qlist.length;i++){ if(userAnswers[i]===qlist[i].answer) correct++; }
+    const attempt = { quizKey: currentQuiz, score: correct, total: qlist.length, timestamp: new Date().toISOString(), answers: userAnswers.slice() };
+    saveAttempt(attempt);
+    // show result
+    scoreTitle.textContent = `النتيجة: ${correct} / ${qlist.length}`;
+    scoreSub.textContent = `النسبة: ${Math.round((correct/qlist.length)*100)}%`;
+    attemptTime.textContent = new Date(attempt.timestamp).toLocaleString('ar-EG');
+    attemptQuiz.textContent = quizzes[currentQuiz].title;
+
+    // build answers list
+    answerList.innerHTML='';
+    qlist.forEach((qq,ii)=>{
+      const item = document.createElement('div'); item.className='answer-item';
+      const picked = attempt.answers[ii]; const correctIdx = qq.answer;
+      let html = `<div style="font-weight:600">${ii+1}. ${qq.q}</div>`;
+      html += `<div class="small" style="margin-top:6px">إجابتك: ${picked===null? '<span style=color:var(--muted)>غير مجاب</span>' : qq.choices[picked]}</div>`;
+      html += `<div class="small">الصحيحة: ${qq.choices[correctIdx]}</div>`;
+      if(picked===correctIdx) html += `<div class="small" style="color:var(--success);margin-top:6px">✔ إجابة صحيحة</div>`;
+      else if(picked===null) html += `<div class="small" style="color:var(--danger);margin-top:6px">✖ لم تجب</div>`;
+      else html += `<div class="small" style="color:var(--danger);margin-top:6px">✖ إجابة خاطئة</div>`;
+      item.innerHTML = html;
+      answerList.appendChild(item);
+    });
+
+    resultArea.style.display='block';
+    // scroll to result
+    resultArea.scrollIntoView({behavior:'smooth', block:'center'});
+    updateBestAndLast();
+  }
+
+  </script>
+</body>
+</html>
